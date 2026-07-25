@@ -1,0 +1,48 @@
+# Local hooks that mirror what CI runs, so a formatting failure costs a second
+# instead of a pipeline run. Install with:  pre-commit install
+#
+# Deval itself has zero required runtime dependencies; these are developer
+# tools only and are never imported by the package.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        # Workflow files use GitHub's `on:` key, which is valid YAML but is
+        # parsed as a boolean by some linters. check-yaml handles it fine.
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+        # docs/deval-src.zip is the browser bundle and is regenerated, not
+        # hand-edited; keep it under the limit.
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: deval-self-scan
+        name: deval self-scan (must stay 100/100)
+        # The project's own quality gate. If a change drops the score, that is
+        # caught here rather than three minutes into CI.
+        entry: python3 -m deval.cli scan . --min-score 100
+        language: system
+        pass_filenames: false
+        types: [python]
+
+      - id: deval-tests
+        name: deval test suite
+        entry: python3 run_tests.py
+        language: system
+        pass_filenames: false
+        types: [python]

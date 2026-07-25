@@ -1,0 +1,53 @@
+name: pages
+
+# Builds and deploys the documentation site, including the in-browser scanner.
+# The scanner runs the *current* source of Deval, so the demo can never drift
+# from what is actually in the repository.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never cancel a half-finished deploy; queue instead.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Bundle Deval source for the browser runtime
+        run: python docs/build_bundle.py
+
+      - name: Verify the site has everything it needs
+        run: |
+          test -f docs/index.html
+          test -f docs/deval-src.zip
+          echo "Bundle size: $(du -h docs/deval-src.zip | cut -f1)"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

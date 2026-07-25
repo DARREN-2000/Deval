@@ -1,0 +1,21 @@
+# Deval's own configuration -- Deval eats its own dog food.
+version: 1
+
+extends:
+  - deval/recommended
+
+rules:
+  documented-public-api: warning
+  no-broken-relative-links: warning
+  require-changelog: warning
+
+weights:
+  security: 1.5
+  testing: 1.25
+
+thresholds:
+  min_score: 85
+  fail_on: error
+
+integrations:
+  "*": auto

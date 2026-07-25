@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Not found — Deval</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: #000000; color: #ffffff; text-align: center; padding: 1.5rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .glow {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 620px; height: 360px; pointer-events: none;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,.10), transparent 70%);
+    filter: blur(120px);
+  }
+  .inner { position: relative; z-index: 1; }
+  .code { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: .8rem; color: #71717a; letter-spacing: .12em; }
+  h1 {
+    font-size: clamp(2rem, 6vw, 3rem); margin: .75rem 0 .75rem; font-weight: 600; letter-spacing: -.04em;
+    background: linear-gradient(to right, #ffffff, #a1a1aa);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  p { color: #a1a1aa; margin: 0 0 1.75rem; font-weight: 350; }
+  a {
+    display: inline-block; padding: .7rem 1.35rem; border-radius: 10px;
+    background: #ffffff; color: #000000; text-decoration: none; font-weight: 500; font-size: .92rem;
+    transition: opacity .15s;
+  }
+  a:hover { opacity: .88; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+<div class="inner">
+  <div class="code">404</div>
+  <h1>This page doesn't exist</h1>
+  <p>The link may be out of date, or the page may have moved.</p>
+  <a href="/deval/">Back to Deval</a>
+</div>
+</body>
+</html>

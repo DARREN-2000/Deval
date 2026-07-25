@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Try Deval in your browser
+    url: https://darren-2000.github.io/deval/
+    about: Scan a repository ZIP without installing anything, to confirm the behaviour first.
+  - name: Report a security vulnerability
+    url: https://github.com/DARREN-2000/deval/security/advisories/new
+    about: Please disclose privately rather than opening a public issue.
+  - name: Question or idea
+    url: https://github.com/DARREN-2000/deval/discussions
+    about: For usage questions and open-ended discussion.

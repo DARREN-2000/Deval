@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+deval.json
+deval-report.html
+report.sarif
+.deval/history.jsonl
+
+# Deval local artifacts
+.deval/
+deval.sarif
+trivy.sarif
+test_tmp/
+*.egg-info

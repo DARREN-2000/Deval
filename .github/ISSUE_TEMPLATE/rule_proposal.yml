@@ -1,0 +1,81 @@
+name: Rule proposal
+description: Propose a new standard or rule for Deval to enforce
+labels: [rule]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Deval adds rules conservatively. A rule earns its place by being
+        checkable from facts, actionable, and inert where it does not apply.
+
+  - type: textarea
+    id: standard
+    attributes:
+      label: The standard
+      description: State it as a rule a team could agree to, not as a tool feature.
+      placeholder: "Every service must declare a health-check endpoint."
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it matters
+      description: What goes wrong in real projects when this is missing?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dimension
+    attributes:
+      label: Engineering Dimension
+      options:
+        - Repository
+        - Documentation
+        - Architecture
+        - Structure
+        - Dependencies
+        - Testing
+        - CI/CD
+        - Security
+        - Maintainability
+        - Ownership
+        - Observability
+        - Operations
+        - Compliance
+    validations:
+      required: true
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      options:
+        - Universal (applies to every repository)
+        - Domain (only when a technology is detected)
+    validations:
+      required: true
+
+  - type: textarea
+    id: detection
+    attributes:
+      label: How it can be checked deterministically
+      description: What evidence in the repository proves pass or fail? No heuristics or model judgement.
+    validations:
+      required: true
+
+  - type: textarea
+    id: fix
+    attributes:
+      label: How a team fixes it
+      description: The remediation Deval should print alongside the finding.
+    validations:
+      required: true
+
+  - type: textarea
+    id: falsepos
+    attributes:
+      label: Where would this misfire?
+      description: Be honest about legitimate projects this would wrongly flag.
+    validations:
+      required: false

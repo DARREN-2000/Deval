@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deval — the Engineering Standards Platform</title>
+<meta name="description" content="Deval scores any repository against 13 engineering dimensions and returns one deterministic health score. Zero dependencies, SARIF output, runs in CI or in your browser.">
+
+<meta property="og:title" content="Deval — the Engineering Standards Platform">
+<meta property="og:description" content="One deterministic health score for any repository. 13 dimensions, 102 rules, 44 checks, zero runtime dependencies.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://darren-2000.github.io/deval/">
+<meta property="og:site_name" content="Deval">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Deval — the Engineering Standards Platform">
+<meta name="twitter:description" content="One deterministic health score for any repository. 13 dimensions, 102 rules, 44 checks, zero runtime dependencies.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="canonical" href="https://darren-2000.github.io/deval/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Deval",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Linux, macOS, Windows, Web",
+  "softwareVersion": "0.7.0",
+  "url": "https://darren-2000.github.io/deval/",
+  "downloadUrl": "https://pypi.org/project/deval/",
+  "codeRepository": "https://github.com/DARREN-2000/deval",
+  "programmingLanguage": "Python",
+  "license": "https://opensource.org/licenses/MIT",
+  "description": "Deval scores any repository against 13 engineering dimensions and returns one deterministic health score. 102 rules, 44 checks, zero runtime dependencies, SARIF output, runs in CI or in your browser.",
+  "author": {
+    "@type": "Person",
+    "name": "Morris Darren Babu",
+    "url": "https://github.com/DARREN-2000"
+  },
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #000000;
+    --panel: rgba(9, 9, 11, 0.40);
+    --text: #ffffff;
+    --muted: #a1a1aa;
+    --muted-dim: #71717a;
+    --accent: #ffffff;
+    --good: #4ade80;
+    --bad: #f87171;
+    --border: rgba(255, 255, 255, 0.10);
+    --border-hi: rgba(255, 255, 255, 0.20);
+    --radius: 12px;
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  ::selection { background: #ffffff; color: #000000; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: #09090b; }
+  ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 5px; }
+  ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+  .wrap { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+  /* Ambient glow behind the hero */
+  .glow {
+    position: absolute; top: -160px; left: 50%; transform: translateX(-50%);
+    width: 760px; height: 420px; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,.10), transparent 70%);
+    filter: blur(120px); animation: breathe 10s ease-in-out infinite;
+  }
+  @keyframes breathe { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+
+  nav {
+    position: sticky; top: 0; z-index: 50;
+    background: transparent; border-bottom: 1px solid transparent;
+    transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+  }
+  nav.scrolled {
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--border);
+  }
+  nav .wrap { display: flex; align-items: center; gap: 1.75rem; height: 64px; }
+  .brand {
+    display: flex; align-items: center; gap: .6rem;
+    font-weight: 600; letter-spacing: -.02em; font-size: 1rem;
+  }
+  .brand .mark {
+    width: 26px; height: 26px; border-radius: 7px;
+    background: #ffffff; color: #000000;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: .82rem; letter-spacing: -.04em;
+  }
+  .brand span { color: var(--muted); font-weight: 500; }
+  nav a { color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 450; transition: color .15s; }
+  nav a:hover { color: var(--text); }
+  nav .spacer { margin-left: auto; }
+
+  header.hero { position: relative; text-align: center; padding: 7rem 0 4rem; z-index: 1; }
+  header.hero .wrap { position: relative; z-index: 1; }
+  .pill {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .8rem; color: var(--muted); margin-bottom: 1.75rem;
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: .35rem .85rem; background: rgba(9,9,11,.6);
+  }
+  .ping { width: 6px; height: 6px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 rgba(74,222,128,.7); animation: ping 2s ease-out infinite; }
+  @keyframes ping { 70% { box-shadow: 0 0 0 7px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
+
+  h1 {
+    font-size: clamp(2.6rem, 7vw, 4.4rem); line-height: 1.05; margin: 0 0 1.25rem;
+    letter-spacing: -.045em; font-weight: 600;
+    background: linear-gradient(to right, #ffffff, #a1a1aa);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  h1 span { color: inherit; background: none; -webkit-text-fill-color: currentColor; }
+  .tagline { font-size: 1.1rem; color: var(--muted); max-width: 660px; margin: 0 auto 2rem; font-weight: 350; }
+  .badges { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-bottom: 2.25rem; }
+  .badge {
+    font-family: var(--mono); font-size: .75rem; padding: .32rem .75rem;
+    border: 1px solid var(--border); border-radius: 999px; color: var(--muted);
+    background: rgba(9,9,11,.5); transition: border-color .15s, color .15s;
+  }
+  .badge:hover { border-color: var(--border-hi); color: var(--text); }
+  .badge b { color: var(--good); font-weight: 500; }
+
+  .cta { display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .7rem 1.35rem; border-radius: 10px; font-weight: 500; font-size: .92rem;
+    text-decoration: none; border: 1px solid transparent; cursor: pointer;
+    transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: #ffffff; color: #000000; }
+  .btn-primary:hover { opacity: .88; }
+  .btn-ghost { border-color: var(--border); color: var(--text); background: rgba(9,9,11,.5); }
+  .btn-ghost:hover { border-color: var(--border-hi); background: rgba(24,24,27,.7); }
+
+  section { padding: 4rem 0; position: relative; }
+  h2 { font-size: 1.75rem; letter-spacing: -.03em; margin: 0 0 .5rem; font-weight: 600; }
+  .lede { color: var(--muted); margin: 0 0 1.75rem; max-width: 700px; font-weight: 350; }
+
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; }
+
+  /* Terminal-style chrome frame */
+  .chrome {
+    background: rgba(9,9,11,.55); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden;
+  }
+  .chrome-bar {
+    display: flex; align-items: center; gap: .45rem;
+    padding: .7rem .9rem; border-bottom: 1px solid var(--border);
+    background: rgba(24,24,27,.5);
+  }
+  .chrome-bar i { width: 10px; height: 10px; border-radius: 50%; background: #27272a; display: block; }
+  .chrome-title {
+    margin-left: .5rem; font-family: var(--mono); font-size: .76rem; color: var(--muted-dim);
+  }
+  .chrome-body { padding: 1.75rem; }
+
+  /* Scanner */
+  .dropzone {
+    border: 1px dashed rgba(255,255,255,.22); border-radius: var(--radius);
+    padding: 3.25rem 1.5rem; text-align: center; cursor: pointer;
+    transition: border-color .2s, background .2s; background: rgba(24,24,27,.35);
+  }
+  .dropzone:hover, .dropzone.over { border-color: rgba(255,255,255,.45); background: rgba(39,39,42,.5); }
+  .dropzone.disabled { opacity: .5; cursor: not-allowed; }
+  .drop-icon { font-size: 2.4rem; display: block; margin-bottom: .6rem; filter: grayscale(1); }
+  .drop-title { font-size: 1.05rem; font-weight: 550; margin: 0 0 .3rem; }
+  .drop-desc { color: var(--muted); font-size: .875rem; margin: 0; }
+  #file-input { display: none; }
+
+  .status { margin-top: 1rem; text-align: center; color: var(--muted); font-size: .88rem; min-height: 1.5rem; font-family: var(--mono); }
+  .status.error { color: var(--bad); }
+  .spinner {
+    display: inline-block; width: 12px; height: 12px; margin-right: .5rem;
+    border: 2px solid rgba(255,255,255,.2); border-top-color: #ffffff;
+    border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #result { display: none; margin-top: 1.5rem; }
+  .result-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .score-chip { font-family: var(--mono); font-size: 1.05rem; font-weight: 600; padding: .4rem .9rem; border-radius: 10px; border: 1px solid var(--border); }
+  iframe#report { width: 100%; height: 640px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+
+  .privacy { margin-top: 1rem; font-size: .82rem; color: var(--muted-dim); text-align: center; }
+
+  /* Install tabs */
+  .tabs { display: flex; gap: .35rem; margin-bottom: -1px; flex-wrap: wrap; }
+  .tab {
+    padding: .5rem 1rem; font-size: .875rem; font-weight: 450; cursor: pointer;
+    border: 1px solid var(--border); border-bottom: none;
+    border-radius: 9px 9px 0 0; color: var(--muted); background: rgba(9,9,11,.4);
+    transition: color .15s, background .15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); background: rgba(24,24,27,.85); }
+  pre {
+    margin: 0; background: rgba(9,9,11,.85); border: 1px solid var(--border);
+    border-radius: 0 var(--radius) var(--radius) var(--radius); padding: 1.15rem; overflow-x: auto;
+    font-family: var(--mono); font-size: .855rem; line-height: 1.75;
+  }
+  pre .c { color: var(--muted-dim); }
+  pre .p { color: var(--good); }
+  .pane { display: none; }
+  .pane.active { display: block; }
+
+  /* Grids */
+  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card {
+    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.35rem; transition: border-color .2s, background .2s, transform .2s;
+  }
+  .card:hover { border-color: var(--border-hi); background: rgba(24,24,27,.55); transform: translateY(-2px); }
+  .card h3 { margin: 0 0 .4rem; font-size: .97rem; font-weight: 550; }
+  .card p { margin: 0; color: var(--muted); font-size: .875rem; font-weight: 350; }
+  .dims { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .dim {
+    font-size: .83rem; padding: .35rem .8rem; border-radius: 8px;
+    background: rgba(24,24,27,.6); border: 1px solid var(--border); color: var(--muted);
+    transition: border-color .15s, color .15s;
+  }
+  .dim:hover { border-color: var(--border-hi); color: var(--text); }
+
+  footer { border-top: 1px solid var(--border); padding: 2.5rem 0; color: var(--muted-dim); font-size: .85rem; }
+  footer a { color: var(--muted); text-decoration: none; }
+  footer a:hover { color: var(--text); }
+  .foot-row { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+  @media (max-width: 640px) {
+    nav .hide-sm { display: none; }
+    header.hero { padding: 4rem 0 2.5rem; }
+    .glow { width: 420px; }
+    .chrome-body { padding: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="brand"><span class="mark">D</span>deval<span></span></div>
+    <a href="#scanner" class="hide-sm">Scanner</a>
+    <a href="#install" class="hide-sm">Install</a>
+    <a href="#dimensions" class="hide-sm">Dimensions</a>
+    <span class="spacer"></span>
+    <a href="https://github.com/DARREN-2000/deval">GitHub</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="glow" aria-hidden="true"></div>
+  <div class="wrap">
+    <span class="pill"><span class="ping" aria-hidden="true"></span>v0.7.0 — 102 rules, 44 checks</span>
+    <h1>One score for<br><span>engineering health</span></h1>
+    <p class="tagline">
+      Deval evaluates any repository against 13 engineering dimensions and returns a single
+      deterministic score — same input, same result, every time. No model, no network, no guesswork.
+    </p>
+    <div class="badges">
+      <span class="badge">self-scan <b>100/100 A+</b></span>
+      <span class="badge">zero runtime dependencies</span>
+      <span class="badge">Python 3.9 – 3.13</span>
+      <span class="badge">SARIF · JSON · HTML · JUnit</span>
+      <span class="badge">MIT</span>
+    </div>
+    <div class="cta">
+      <a href="#scanner" class="btn btn-primary">Scan a repo in your browser</a>
+      <a href="https://github.com/DARREN-2000/deval" class="btn btn-ghost">View source</a>
+    </div>
+  </div>
+</header>
+
+<section id="scanner">
+  <div class="wrap">
+    <h2>Try it — no install</h2>
+    <p class="lede">
+      Drop in a repository ZIP. This runs the <em>real</em> Deval engine compiled to WebAssembly,
+      not a simulation — the same code you get from PyPI. Your files never leave your machine.
+    </p>
+
+    <div class="chrome">
+      <div class="chrome-bar" aria-hidden="true">
+        <i></i><i></i><i></i>
+        <span class="chrome-title">deval scan — running locally in your browser</span>
+      </div>
+      <div class="chrome-body">
+      <div class="dropzone disabled" id="dropzone">
+        <span class="drop-icon">📦</span>
+        <p class="drop-title">Drop a repository ZIP here</p>
+        <p class="drop-desc">or click to browse — max ~50 MB</p>
+        <input type="file" id="file-input" accept=".zip,application/zip">
+      </div>
+      <div class="status" id="status"><span class="spinner"></span>Starting Python runtime…</div>
+
+      <div id="result">
+        <div class="result-bar">
+          <span class="score-chip" id="score-chip"></span>
+          <button class="btn btn-ghost" id="download-btn" type="button">Download HTML report</button>
+          <button class="btn btn-ghost" id="again-btn" type="button">Scan another</button>
+        </div>
+        <iframe id="report" sandbox="allow-same-origin" title="Deval report"></iframe>
+      </div>
+
+      <p class="privacy">
+        Runs entirely client-side via Pyodide. Nothing is uploaded, logged, or transmitted.
+        Plugin rules inside the ZIP are <strong>not</strong> executed.
+      </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="wrap">
+    <h2>Install</h2>
+    <p class="lede">Deval has no required runtime dependencies, so it drops into any environment without pulling a tree of packages behind it.</p>
+
+    <div class="tabs">
+      <div class="tab active" data-pane="pip">pip</div>
+      <div class="tab" data-pane="docker">Docker</div>
+      <div class="tab" data-pane="action">GitHub Action</div>
+      <div class="tab" data-pane="ci">Quality gate</div>
+    </div>
+
+    <div class="pane active" id="pane-pip">
+<pre><span class="c"># Install from PyPI</span>
+<span class="p">pip install deval</span>
+
+<span class="c"># Score the repository you are standing in</span>
+<span class="p">deval scan .</span>
+
+<span class="c"># Machine-readable output for CI and code scanning</span>
+<span class="p">deval scan . -f sarif -o deval.sarif</span>
+<span class="p">deval scan . -f json  -o deval.json</span>
+
+<span class="c"># Understand any rule, with rationale and a fix</span>
+<span class="p">deval explain DV6003</span></pre>
+    </div>
+
+    <div class="pane" id="pane-docker">
+<pre><span class="c"># Scan the current directory, read-only, as a non-root user</span>
+<span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:latest</span>
+
+<span class="c"># Any subcommand works</span>
+<span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:latest \
+  scan . -f markdown</span>
+
+<span class="c"># Pin a version for reproducible pipelines</span>
+<span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:0.6.0</span></pre>
+    </div>
+
+    <div class="pane" id="pane-action">
+<pre><span class="c"># .github/workflows/deval.yml</span>
+name: deval
+on: [push, pull_request]
+
+jobs:
+  standards:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: <span class="p">DARREN-2000/deval@v1</span>
+        id: deval
+        with:
+          path: .
+          min-score: '80'
+          upload-sarif: 'true'
+      - uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: report.sarif
+
+      <span class="c"># Outputs: score, grade, passed</span>
+      - run: echo "Scored ${{ steps.deval.outputs.score }}"</pre>
+    </div>
+
+    <div class="pane" id="pane-ci">
+<pre><span class="c"># Fail the build below a score, or on any error-level finding</span>
+<span class="p">deval scan . --min-score 80 --fail-on error</span>
+
+<span class="c"># Adopt gradually: freeze today's findings, block only new ones</span>
+<span class="p">deval baseline .</span>
+<span class="p">deval scan . --baseline .deval/baseline.json</span>
+
+<span class="c"># Check config and tool readiness before you rely on it</span>
+<span class="p">deval doctor .</span></pre>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <h2>What makes it different</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Deterministic, not probabilistic</h3>
+        <p>No model sits in the loop. The same commit always produces the same score, so it can gate a build without flaking.</p>
+      </div>
+      <div class="card">
+        <h3>One score from many tools</h3>
+        <p>Findings from Ruff, Semgrep, Trivy, and Gitleaks are normalised, de-duplicated, and folded into a single number.</p>
+      </div>
+      <div class="card">
+        <h3>Every rule explains itself</h3>
+        <p>Each rule carries a stable DV code with problem, rationale, example, and fix. <code>deval explain</code> prints all of it.</p>
+      </div>
+      <div class="card">
+        <h3>Standards you can layer</h3>
+        <p>Global → Recommended → Domain → Organization → Repository. A repo override always wins; nothing is applied silently.</p>
+      </div>
+      <div class="card">
+        <h3>Rules are just functions</h3>
+        <p>Write a rule with a decorator and drop it in a plugin folder. No subclassing, no framework to learn.</p>
+      </div>
+      <div class="card">
+        <h3>Adoptable on day one</h3>
+        <p>Baselines freeze existing debt so a large codebase can enforce standards on new work without a rewrite.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dimensions">
+  <div class="wrap">
+    <h2>13 engineering dimensions</h2>
+    <p class="lede">Each dimension is scored independently, then weighted into the overall figure. Dimensions with no evidence are excluded rather than counted as perfect.</p>
+    <div class="dims">
+      <span class="dim">Repository</span><span class="dim">Documentation</span><span class="dim">Architecture</span>
+      <span class="dim">Structure</span><span class="dim">Dependencies</span><span class="dim">Testing</span>
+      <span class="dim">CI/CD</span><span class="dim">Security</span><span class="dim">Maintainability</span>
+      <span class="dim">Ownership</span><span class="dim">Observability</span><span class="dim">Operations</span>
+      <span class="dim">Compliance</span>
+    </div>
+    <p class="lede" style="margin-top:1.5rem">
+      Full reference:
+      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/dimensions.md">dimensions</a> ·
+      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/standards.md">standards</a> ·
+      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/principles.md">principles</a> ·
+      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/ecosystem.md">ecosystem</a>
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div>MIT licensed · <span id="bundle-meta">Deval</span></div>
+    <div>
+      <a href="https://github.com/DARREN-2000/deval">GitHub</a> ·
+      <a href="https://pypi.org/project/deval/">PyPI</a> ·
+      <a href="https://github.com/DARREN-2000/deval/blob/main/CHANGELOG.md">Changelog</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var dropzone = document.getElementById("dropzone");
+  var fileInput = document.getElementById("file-input");
+  var statusEl = document.getElementById("status");
+  var resultEl = document.getElementById("result");
+  var reportEl = document.getElementById("report");
+  var scoreChip = document.getElementById("score-chip");
+  var againBtn = document.getElementById("again-btn");
+  var downloadBtn = document.getElementById("download-btn");
+
+  var pyodide = null;
+  var booting = null;
+  var lastHtml = "";
+
+  // Compressed upload cap. This alone is not enough: a small ZIP can expand to
+  // gigabytes, so the extraction loop also caps the uncompressed total and the
+  // file count. Without those, a 50 MB archive could exhaust the tab's memory.
+  var MAX_BYTES = 50 * 1024 * 1024;
+  var MAX_UNCOMPRESSED = 250 * 1024 * 1024;
+  var MAX_FILES = 20000;
+  var SKIP = /(^|\/)(\.git|node_modules|__MACOSX|\.venv|venv)(\/|$)/;
+
+  function setStatus(msg, spinning, isError) {
+    statusEl.className = isError ? "status error" : "status";
+    statusEl.innerHTML = (spinning ? '<span class="spinner"></span>' : "") + msg;
+  }
+
+  // Install tabs
+  Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (tab) {
+    tab.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll(".tab"), function (t) {
+        t.classList.remove("active");
+      });
+      Array.prototype.forEach.call(document.querySelectorAll(".pane"), function (p) {
+        p.classList.remove("active");
+      });
+      tab.classList.add("active");
+      document.getElementById("pane-" + tab.dataset.pane).classList.add("active");
+    });
+  });
+
+  // Show which build the page is running, so a stale deploy is visible.
+  fetch("bundle-info.json")
+    .then(function (r) { return r.ok ? r.json() : null; })
+    .then(function (info) {
+      if (info) {
+        document.getElementById("bundle-meta").textContent =
+          "Deval " + info.version + " · built " + info.built;
+      }
+    })
+    .catch(function () { /* metadata is cosmetic; never block the page */ });
+
+  // Boot Pyodide and load the real Deval package onto sys.path.
+  // This works only because Deval has zero runtime dependencies.
+  function boot() {
+    if (booting) return booting;
+    booting = (async function () {
+      setStatus("Starting Python runtime…", true);
+      pyodide = await loadPyodide();
+
+      setStatus("Loading the Deval engine…", true);
+      var resp = await fetch("deval-src.zip");
+      if (!resp.ok) throw new Error("could not fetch deval-src.zip (" + resp.status + ")");
+      var zip = await JSZip.loadAsync(await resp.arrayBuffer());
+
+      pyodide.FS.mkdirTree("/lib/deval-pkg");
+      var names = Object.keys(zip.files);
+      for (var i = 0; i < names.length; i++) {
+        var entry = zip.files[names[i]];
+        if (entry.dir) continue;
+        var full = "/lib/deval-pkg/" + names[i];
+        pyodide.FS.mkdirTree(full.substring(0, full.lastIndexOf("/")));
+        pyodide.FS.writeFile(full, await entry.async("uint8array"));
+      }
+
+      await pyodide.runPythonAsync([
+        "import sys",
+        "sys.path.insert(0, '/lib/deval-pkg')",
+        "import deval",
+      ].join("\n"));
+
+      dropzone.classList.remove("disabled");
+      setStatus("Ready — drop a repository ZIP to scan it.", false);
+    })();
+    return booting;
+  }
+
+  async function extractInto(file) {
+    var zip = await JSZip.loadAsync(file);
+    var names = Object.keys(zip.files).filter(function (n) {
+      return !zip.files[n].dir && !SKIP.test(n);
+    });
+    if (!names.length) throw new Error("that ZIP contains no scannable files");
+    if (names.length > MAX_FILES) {
+      throw new Error("that ZIP holds " + names.length.toLocaleString() +
+        " files (limit " + MAX_FILES.toLocaleString() + ") — try a shallow export");
+    }
+
+    // GitHub's "Download ZIP" wraps everything in one folder. Strip it so the
+    // manifest files land at the repository root where the rules expect them.
+    var top = names[0].split("/")[0];
+    var single = names.every(function (n) { return n.split("/")[0] === top; })
+      && names.some(function (n) { return n.indexOf("/") !== -1; });
+
+    await pyodide.runPythonAsync([
+      "import shutil, os",
+      "shutil.rmtree('/repo', ignore_errors=True)",
+      "os.makedirs('/repo', exist_ok=True)",
+    ].join("\n"));
+
+    var written = 0;
+    var bytes = 0;
+    for (var i = 0; i < names.length; i++) {
+      var rel = single ? names[i].substring(top.length + 1) : names[i];
+      if (!rel) continue;
+
+      // Reject absolute paths and ../ traversal. JSZip reports whatever the
+      // archive claims, so a hostile ZIP could otherwise write outside /repo.
+      if (rel.charAt(0) === "/" || rel.split("/").indexOf("..") !== -1) continue;
+
+      var data = await zip.files[names[i]].async("uint8array");
+      bytes += data.length;
+      if (bytes > MAX_UNCOMPRESSED) {
+        throw new Error("that ZIP expands beyond " +
+          Math.round(MAX_UNCOMPRESSED / 1048576) + " MB — try a shallow export");
+      }
+
+      var full = "/repo/" + rel;
+      pyodide.FS.mkdirTree(full.substring(0, full.lastIndexOf("/")));
+      pyodide.FS.writeFile(full, data);
+      written++;
+      if (written % 200 === 0) {
+        setStatus("Extracting… " + written + " files (" +
+          Math.round(bytes / 1048576) + " MB)", true);
+      }
+    }
+    return written;
+  }
+
+  // run_integrations=False: Ruff/Semgrep/Trivy are not present in the browser.
+  // load_plugins=False: never execute Python that came out of an uploaded ZIP.
+  var SCAN_PY = [
+    "import json, traceback",
+    "def _run():",
+    "    try:",
+    "        from deval.engine import scan",
+    "        from deval.reporters import render",
+    "        result = scan('/repo', run_integrations=False, load_plugins=False)",
+    "        return json.dumps({",
+    "            'ok': True,",
+    "            'html': render('html', result),",
+    "            'score': result.overall_score,",
+    "            'grade': result.grade,",
+    "            'passed': result.passed_gate,",
+    "        })",
+    "    except Exception:",
+    "        return json.dumps({'ok': False, 'error': traceback.format_exc()})",
+    "_run()",
+  ].join("\n");
+
+  async function handleFile(file) {
+    if (!file) return;
+    if (!/\.zip$/i.test(file.name)) {
+      setStatus("Please choose a .zip file.", false, true);
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      setStatus("That ZIP is larger than 50 MB — try a shallow export.", false, true);
+      return;
+    }
+
+    try {
+      await boot();
+      setStatus("Extracting " + file.name + "…", true);
+      var count = await extractInto(file);
+
+      setStatus("Scanning " + count + " files…", true);
+      var payload = JSON.parse(await pyodide.runPythonAsync(SCAN_PY));
+
+      if (!payload.ok) {
+        console.error(payload.error);
+        setStatus("Scan failed — see the browser console for the traceback.", false, true);
+        return;
+      }
+
+      lastHtml = payload.html;
+      scoreChip.textContent = payload.score + "/100 · " + payload.grade;
+      scoreChip.style.color = payload.score >= 90 ? "#22c55e" : payload.score >= 75 ? "#f59e0b" : "#f87171";
+
+      reportEl.srcdoc = payload.html;
+      resultEl.style.display = "block";
+      setStatus("Scanned " + count + " files in " + file.name + ".", false);
+      resultEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (err) {
+      console.error(err);
+      setStatus("Error: " + (err && err.message ? err.message : String(err)), false, true);
+    }
+  }
+
+  dropzone.addEventListener("click", function () {
+    if (!dropzone.classList.contains("disabled")) fileInput.click();
+  });
+  fileInput.addEventListener("change", function (e) { handleFile(e.target.files[0]); });
+
+  ["dragenter", "dragover"].forEach(function (evt) {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.add("over");
+    });
+  });
+  ["dragleave", "drop"].forEach(function (evt) {
+    dropzone.addEventListener(evt, function (e) {
+      e.preventDefault();
+      dropzone.classList.remove("over");
+    });
+  });
+  dropzone.addEventListener("drop", function (e) {
+    if (e.dataTransfer && e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+  });
+
+  againBtn.addEventListener("click", function () {
+    resultEl.style.display = "none";
+    fileInput.value = "";
+    setStatus("Ready — drop a repository ZIP to scan it.", false);
+    document.getElementById("scanner").scrollIntoView({ behavior: "smooth" });
+  });
+
+  downloadBtn.addEventListener("click", function () {
+    if (!lastHtml) return;
+    var url = URL.createObjectURL(new Blob([lastHtml], { type: "text/html" }));
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "deval-report.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // Frost the nav once the page has scrolled past the hero glow.
+  var navEl = document.querySelector("nav");
+  var onScroll = function () {
+    if (navEl) { navEl.classList.toggle("scrolled", window.scrollY > 10); }
+  };
+  window.addEventListener("scroll", onScroll, { passive: true });
+  onScroll();
+
+  // Warm the runtime up front so the first scan feels instant.
+  boot().catch(function (err) {
+    console.error(err);
+    setStatus("Could not start the runtime: " + err.message, false, true);
+  });
+})();
+</script>
+</body>
+</html>

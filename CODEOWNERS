@@ -1,0 +1,5 @@
+# Every path needs a responsible reviewer.
+*                        @deval/maintainers
+/src/deval/checks/       @deval/maintainers
+/src/deval/integrations/ @deval/maintainers
+/.github/                @deval/maintainers

@@ -1,0 +1,30 @@
+version: 2
+
+updates:
+  # Deval has no required runtime dependencies, so this covers the dev and
+  # build tooling only.
+  - package-ecosystem: pip
+    directory: "/"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    groups:
+      dev-tooling:
+        patterns: ["*"]
+
+  # Pinned action versions are a supply-chain surface; keep them current.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels: [dependencies, ci]
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    labels: [dependencies, docker]

@@ -1,0 +1,47 @@
+name: codeql
+
+# Static application security testing. Deval's own rule DV3006 ci-has-sast
+# requires this of any repository with CI, so the tool runs it on itself.
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Weekly: CodeQL ships new queries, so a repo that never re-scans slowly
+    # falls behind on classes of bug it would now catch.
+    - cron: "27 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze Python
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python
+          # security-extended adds lower-severity and higher-precision queries
+          # beyond the default set; worth the extra minutes for a security tool.
+          queries: security-extended
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:python"

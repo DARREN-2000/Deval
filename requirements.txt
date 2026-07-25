@@ -1,0 +1,7 @@
+# Deval runs on the Python standard library only — it has no third-party
+# runtime dependencies. This file exists to make that guarantee explicit and
+# to satisfy the 'declare your dependencies' universal standard when Deval
+# scans itself with the auto-detected deval/python standard.
+#
+# Development/test tooling (optional):
+#   pytest

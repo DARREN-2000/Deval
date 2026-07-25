@@ -1,0 +1,44 @@
+# Keep the build context small and free of anything that could leak into an
+# image layer. Only pyproject.toml, README.md, LICENSE and src/ are needed.
+
+.git
+.github
+.gitignore
+
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+.venv/
+venv/
+env/
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+test_tmp/
+
+tests/
+docs/
+examples/
+
+*.sarif
+*.log
+deval-report.html
+deval.json
+.deval/baseline.json
+
+.DS_Store
+.idea/
+.vscode/
+
+# Never ship local secrets or environment files into a layer.
+.env
+.env.*
+*.pem
+*.key

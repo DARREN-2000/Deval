@@ -1,0 +1,55 @@
+name: Bug report
+description: Something in Deval behaves incorrectly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Deval is deterministic by design, so a
+        reproducible case is usually enough to fix it quickly.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The exact command, and the smallest repository layout that shows it.
+      placeholder: |
+        1. Repo contains: pyproject.toml, src/app.py
+        2. Run: deval scan . -f json
+        3. DV4002 is reported, but the file is not world-writable
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `deval doctor .`
+      description: This captures your config, detected stack, and tool readiness in one go.
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Deval version
+      placeholder: "deval --version"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version and OS
+      placeholder: "3.11 on Ubuntu 24.04"
+    validations:
+      required: true

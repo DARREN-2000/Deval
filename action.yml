@@ -1,0 +1,61 @@
+name: "Deval"
+description: "Evaluate a repository against engineering standards and enforce a quality gate."
+branding:
+  icon: "check-circle"
+  color: "green"
+inputs:
+  path:
+    description: "Repository path to scan"
+    required: false
+    default: "."
+  min-score:
+    description: "Minimum overall score required to pass the gate"
+    required: false
+    default: "0"
+  config:
+    description: "Path to a .deval.yml file"
+    required: false
+    default: ""
+  upload-sarif:
+    description: "Write report.sarif for GitHub Code Scanning"
+    required: false
+    default: "true"
+outputs:
+  score:
+    description: "Overall repository health score"
+    value: ${{ steps.deval.outputs.score }}
+  grade:
+    description: "Overall letter grade"
+    value: ${{ steps.deval.outputs.grade }}
+  passed:
+    description: "Whether the quality gate passed"
+    value: ${{ steps.deval.outputs.passed }}
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+    - name: Install Deval
+      shell: bash
+      run: pip install "${{ github.action_path }}"
+    - name: Run Deval
+      id: deval
+      shell: bash
+      run: |
+        set -e
+        ARGS="${{ inputs.path }}"
+        if [ -n "${{ inputs.config }}" ]; then ARGS="$ARGS --config ${{ inputs.config }}"; fi
+        deval scan $ARGS -f json -o deval.json --min-score ${{ inputs.min-score }} || true
+        if [ "${{ inputs.upload-sarif }}" = "true" ]; then
+          deval scan $ARGS -f sarif -o report.sarif --min-score ${{ inputs.min-score }} || true
+        fi
+        deval scan $ARGS -f markdown >> "$GITHUB_STEP_SUMMARY" || true
+        SCORE=$(python -c "import json;print(json.load(open('deval.json'))['overall_score'])")
+        GRADE=$(python -c "import json;print(json.load(open('deval.json'))['grade'])")
+        PASSED=$(python -c "import json;print(str(json.load(open('deval.json'))['passed_gate']).lower())")
+        echo "score=$SCORE" >> "$GITHUB_OUTPUT"
+        echo "grade=$GRADE" >> "$GITHUB_OUTPUT"
+        echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
+        deval scan $ARGS --min-score ${{ inputs.min-score }}

@@ -1,0 +1,89 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "deval"
+version = "0.7.0"
+description = "Deval - the open-source Engineering Standards Platform. Evaluate any repository against built-in best practices and org policies, and get one deterministic health score."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Deval Contributors" }]
+keywords = ["linter", "quality", "standards", "static-analysis", "ci", "governance", "sarif"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Quality Assurance",
+]
+# Deval has zero required runtime dependencies. It ships a small pure-Python
+# YAML reader and uses PyYAML automatically when it happens to be installed,
+# so `pip install deval` never pulls anything into a user's environment and the
+# package runs unmodified in restricted and WebAssembly (Pyodide) runtimes.
+dependencies = []
+
+[project.optional-dependencies]
+# Opt in to full YAML support for exotic config files.
+yaml = ["PyYAML>=5.1"]
+dev = ["pytest>=7", "pytest-cov", "ruff", "build", "twine", "PyYAML>=5.1"]
+
+[project.urls]
+Homepage = "https://github.com/DARREN-2000/deval"
+Documentation = "https://darren-2000.github.io/deval/"
+Repository = "https://github.com/DARREN-2000/deval"
+Changelog = "https://github.com/DARREN-2000/deval/blob/main/CHANGELOG.md"
+Issues = "https://github.com/DARREN-2000/deval/issues"
+
+[project.scripts]
+deval = "deval.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/deval"]
+
+# An sdist should be enough to rebuild and verify the project from scratch,
+# without carrying build artifacts or the multi-megabyte browser bundle.
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/deval",
+  "tests",
+  "fuzz",
+  "docs/*.md",
+  "docs/adr/*.md",
+  "README.md",
+  "LICENSE",
+  "CHANGELOG.md",
+  "CONTRIBUTING.md",
+  "CODE_OF_CONDUCT.md",
+  "SECURITY.md",
+  "GOVERNANCE.md",
+  "MAINTAINERS.md",
+  "SUPPORT.md",
+  "ROADMAP.md",
+  ".pre-commit-config.yaml",
+  "action.yml",
+  "Dockerfile",
+  ".deval.yml",
+  "run_tests.py",
+  "pyproject.toml",
+]
+exclude = ["docs/deval-src.zip", "fuzz/crashes", "**/__pycache__", "**/*.pyc"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py39"
+
+[tool.coverage.run]
+source = ["deval"]
+branch = true
