@@ -111,7 +111,15 @@ def require_security_policy(ctx: CheckContext) -> Iterable[Finding]:
 
 @check("no-world-writable", "security")
 def no_world_writable(ctx: CheckContext) -> Iterable[Finding]:
+    import os
     import stat
+
+    # NTFS does not implement Unix-style permission bits. Python's C runtime
+    # shim synthesises broad permission values for every file, which means
+    # ``S_IWOTH`` is always set on Windows regardless of actual ACLs. Emitting
+    # findings here would be a guaranteed false-positive, so we skip entirely.
+    if os.name != "posix":
+        return
 
     offenders = []
     for rf in ctx.index.files:
