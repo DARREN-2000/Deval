@@ -31,8 +31,12 @@ class RuffIntegration(Integration):
             data = json.loads(run.stdout or "[]")
         except json.JSONDecodeError:
             return []
+        if not isinstance(data, list):
+            return []
         out: list[Finding] = []
         for item in data:
+            if not isinstance(item, dict):
+                continue
             out.append(Finding(
                 rule_id=f"ruff/{item.get('code', 'E')}",
                 category="maintainability",
@@ -58,10 +62,19 @@ class EslintIntegration(Integration):
             data = json.loads(run.stdout or "[]")
         except json.JSONDecodeError:
             return []
+        if not isinstance(data, list):
+            return []
         out: list[Finding] = []
         for file_result in data:
+            if not isinstance(file_result, dict):
+                continue
             path = file_result.get("filePath")
-            for msg in file_result.get("messages", []):
+            msgs = file_result.get("messages")
+            if not isinstance(msgs, list):
+                continue
+            for msg in msgs:
+                if not isinstance(msg, dict):
+                    continue
                 sev = Severity.ERROR if msg.get("severity") == 2 else Severity.WARNING
                 out.append(Finding(
                     rule_id=f"eslint/{msg.get('ruleId') or 'parse'}",
@@ -88,8 +101,12 @@ class GitleaksIntegration(Integration):
             data = json.loads(run.stdout or "[]")
         except json.JSONDecodeError:
             return []
+        if not isinstance(data, list):
+            return []
         out: list[Finding] = []
-        for item in data or []:
+        for item in data:
+            if not isinstance(item, dict):
+                continue
             out.append(Finding(
                 rule_id="no-hardcoded-secrets",  # map onto native rule for dedupe
                 category="security",

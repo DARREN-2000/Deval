@@ -21,35 +21,65 @@ _LEVEL_TO_SEVERITY = {
 
 def _rule_levels(run: dict[str, Any]) -> dict[str, str]:
     levels: dict[str, str] = {}
-    driver = (run.get("tool") or {}).get("driver") or {}
-    for rule in driver.get("rules") or []:
+    tool = run.get("tool")
+    if not isinstance(tool, dict):
+        return levels
+    driver = tool.get("driver")
+    if not isinstance(driver, dict):
+        return levels
+    rules = driver.get("rules")
+    if not isinstance(rules, list):
+        return levels
+    for rule in rules:
+        if not isinstance(rule, dict):
+            continue
         rid = rule.get("id")
-        cfg = rule.get("defaultConfiguration") or {}
-        if rid and cfg.get("level"):
+        cfg = rule.get("defaultConfiguration")
+        if isinstance(cfg, dict) and rid and cfg.get("level"):
             levels[rid] = cfg["level"]
     return levels
 
 
 def findings_from_sarif(doc: dict[str, Any], source: str, category: str) -> list[Finding]:
     findings: list[Finding] = []
-    for run in doc.get("runs") or []:
+    if not isinstance(doc, dict):
+        return findings
+    runs = doc.get("runs")
+    if not isinstance(runs, list):
+        return findings
+    for run in runs:
+        if not isinstance(run, dict):
+            continue
         rule_levels = _rule_levels(run)
-        for result in run.get("results") or []:
+        results = run.get("results")
+        if not isinstance(results, list):
+            continue
+        for result in results:
+            if not isinstance(result, dict):
+                continue
             rule_id = result.get("ruleId") or "unknown"
             level = result.get("level") or rule_levels.get(rule_id, "warning")
             severity = _LEVEL_TO_SEVERITY.get(level, Severity.WARNING)
             message = ""
-            msg = result.get("message") or {}
+            msg = result.get("message")
             if isinstance(msg, dict):
                 message = msg.get("text") or msg.get("markdown") or ""
+            elif isinstance(msg, str):
+                message = msg
             path = None
             line = None
-            locations = result.get("locations") or []
-            if locations:
-                phys = (locations[0] or {}).get("physicalLocation") or {}
-                path = (phys.get("artifactLocation") or {}).get("uri")
-                region = phys.get("region") or {}
-                line = region.get("startLine")
+            locations = result.get("locations")
+            if isinstance(locations, list) and locations:
+                loc = locations[0]
+                if isinstance(loc, dict):
+                    phys = loc.get("physicalLocation")
+                    if isinstance(phys, dict):
+                        art = phys.get("artifactLocation")
+                        if isinstance(art, dict):
+                            path = art.get("uri")
+                        region = phys.get("region")
+                        if isinstance(region, dict):
+                            line = region.get("startLine")
             findings.append(
                 Finding(
                     rule_id=f"{source}/{rule_id}",

@@ -156,7 +156,7 @@ code{{background:#0b1220;padding:1px 6px;border-radius:5px;font-size:12px}}
     <div style="margin-top:8px">{gate_badge}</div>
     {gate_reasons}
     <div class="sub" style="margin-top:10px">{passed_count} checks passed \u00b7 {len(failed)} failed
-    {(' &#183; integrations: ' + ', '.join(result.integrations_run)) if result.integrations_run else ''}</div>
+    {(' &#183; integrations: ' + ', '.join(_html.escape(i) for i in result.integrations_run)) if result.integrations_run else ''}</div>
   </div>
 </div>
 <div class="grid">{cat_rows}</div>

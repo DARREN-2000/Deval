@@ -47,6 +47,7 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
 
+      # Python 3.11+ is required for the `tomllib` import below used to parse pyproject.toml.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -95,6 +96,9 @@ jobs:
             echo "::error::The wheel does not contain the deval package."; exit 1
           fi
 
+      # Verify the wheel installs and runs in a clean environment.
+      # We use /tmp/smoke (outside the repository directory) so that Deval's 
+      # scan of '.' doesn't inspect the temporary virtual environment.
       - name: Verify the wheel installs and runs in a clean environment
         run: |
           set -e

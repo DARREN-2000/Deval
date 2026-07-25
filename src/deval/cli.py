@@ -203,7 +203,7 @@ def _git_changed(path: str, base: str) -> set[str] | None:
     try:
         out = subprocess.run(
             ["git", "-C", path, "diff", "--name-only", base],
-            capture_output=True, text=True, timeout=15,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
         )
         if out.returncode != 0:
             return None
@@ -574,7 +574,7 @@ def _run_test_rule(args) -> int:
         expect_file = case / "expect.txt"
         expected = set()
         if expect_file.exists():
-            expected = {ln.strip() for ln in expect_file.read_text().splitlines() if ln.strip()}
+            expected = {ln.strip() for ln in expect_file.read_text(encoding="utf-8").splitlines() if ln.strip()}
         result = run_scan(str(case), run_integrations=False, load_plugins=True)
         actual = {f.rule_id for f in result.failed_findings}
         missing = expected - actual

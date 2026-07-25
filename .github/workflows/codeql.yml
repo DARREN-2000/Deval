@@ -13,6 +13,10 @@ on:
     # falls behind on classes of bug it would now catch.
     - cron: "27 4 * * 1"
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

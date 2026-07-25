@@ -45,17 +45,20 @@ runs:
       shell: bash
       run: |
         set -e
-        ARGS="${{ inputs.path }}"
-        if [ -n "${{ inputs.config }}" ]; then ARGS="$ARGS --config ${{ inputs.config }}"; fi
-        deval scan $ARGS -f json -o deval.json --min-score ${{ inputs.min-score }} || true
-        if [ "${{ inputs.upload-sarif }}" = "true" ]; then
-          deval scan $ARGS -f sarif -o report.sarif --min-score ${{ inputs.min-score }} || true
+        # Use a bash array to properly handle paths or config files with spaces
+        ARGS=("${{ inputs.path }}")
+        if [ -n "${{ inputs.config }}" ]; then 
+          ARGS+=("--config" "${{ inputs.config }}")
         fi
-        deval scan $ARGS -f markdown >> "$GITHUB_STEP_SUMMARY" || true
+        deval scan "${ARGS[@]}" -f json -o deval.json --min-score "${{ inputs.min-score }}" || true
+        if [ "${{ inputs.upload-sarif }}" = "true" ]; then
+          deval scan "${ARGS[@]}" -f sarif -o report.sarif --min-score "${{ inputs.min-score }}" || true
+        fi
+        deval scan "${ARGS[@]}" -f markdown >> "$GITHUB_STEP_SUMMARY" || true
         SCORE=$(python -c "import json;print(json.load(open('deval.json'))['overall_score'])")
         GRADE=$(python -c "import json;print(json.load(open('deval.json'))['grade'])")
         PASSED=$(python -c "import json;print(str(json.load(open('deval.json'))['passed_gate']).lower())")
         echo "score=$SCORE" >> "$GITHUB_OUTPUT"
         echo "grade=$GRADE" >> "$GITHUB_OUTPUT"
         echo "passed=$PASSED" >> "$GITHUB_OUTPUT"
-        deval scan $ARGS --min-score ${{ inputs.min-score }}
+        deval scan "${ARGS[@]}" --min-score "${{ inputs.min-score }}"

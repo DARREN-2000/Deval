@@ -52,7 +52,7 @@ def no_duplicate_dependencies(ctx: CheckContext) -> Iterable[Finding]:
         line = line.strip()
         if not line or line.startswith(("#", "-")):
             continue
-        name = re.split(r"[<>=!~\[ ]", line, 1)[0].strip().lower()
+        name = re.split(r"[<>=!~\[ ]", line, maxsplit=1)[0].strip().lower()
         if not name:
             continue
         if name in names:

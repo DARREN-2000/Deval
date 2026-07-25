@@ -15,9 +15,9 @@ from .model import CATEGORIES, CategoryScore, Finding, Severity
 
 # Points removed from a category's 100 for each failed finding of a severity.
 SEVERITY_PENALTY = {
-    Severity.ERROR: 18,
-    Severity.WARNING: 7,
-    Severity.INFO: 2,
+    Severity.ERROR: 25,
+    Severity.WARNING: 12,
+    Severity.INFO: 4,
     Severity.OFF: 0,
 }
 

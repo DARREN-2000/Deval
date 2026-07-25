@@ -48,22 +48,29 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
 
 <style>
   :root {
     --bg: #000000;
-    --panel: rgba(9, 9, 11, 0.40);
+    --bg-elevated: #0a0a0a;
+    --bg-card: rgba(10, 10, 10, 0.6);
+    --bg-card-hover: rgba(20, 20, 20, 0.8);
+    --panel: rgba(255, 255, 255, 0.03);
     --text: #ffffff;
     --muted: #a1a1aa;
     --muted-dim: #71717a;
     --accent: #ffffff;
     --good: #4ade80;
     --bad: #f87171;
-    --border: rgba(255, 255, 255, 0.10);
-    --border-hi: rgba(255, 255, 255, 0.20);
+    --blue: #60a5fa;
+    --purple: #a78bfa;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hi: rgba(255, 255, 255, 0.15);
     --radius: 12px;
     --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -76,265 +83,514 @@
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
-  ::selection { background: #ffffff; color: #000000; }
+  ::selection { background: rgba(255,255,255,0.2); color: #fff; }
   ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: #09090b; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 5px; }
   ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-  .wrap { width: 100%; max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
-
-  /* Ambient glow behind the hero */
-  .glow {
-    position: absolute; top: -160px; left: 50%; transform: translateX(-50%);
-    width: 760px; height: 420px; pointer-events: none; z-index: 0;
-    background: radial-gradient(ellipse at center, rgba(255,255,255,.10), transparent 70%);
-    filter: blur(120px); animation: breathe 10s ease-in-out infinite;
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 { margin: 0; font-weight: 600; letter-spacing: -0.03em; }
+  h1 { font-size: clamp(2.5rem, 6vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; font-weight: 700; letter-spacing: -0.04em; }
+  h2 { font-size: clamp(2rem, 4vw, 2.75rem); line-height: 1.2; margin-bottom: 1rem; }
+  h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+  p { margin: 0 0 1.5rem 0; color: var(--muted); font-size: 1.125rem; }
+  .text-gradient {
+    background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
-  @keyframes breathe { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
 
+  /* Layout */
+  .wrap { width: 100%; max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+  section { padding: 6rem 0; position: relative; }
+  .section-header { text-align: center; max-width: 700px; margin: 0 auto 4rem auto; }
+  .section-header p { font-size: 1.25rem; font-weight: 300; }
+
+  /* Animation Classes */
+  .animate-on-scroll { opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+  .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
+
+  /* Nav */
   nav {
-    position: sticky; top: 0; z-index: 50;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: transparent; border-bottom: 1px solid transparent;
-    transition: background .3s ease, border-color .3s ease, backdrop-filter .3s ease;
+    transition: var(--transition);
   }
   nav.scrolled {
-    background: rgba(0,0,0,.72);
+    background: rgba(0, 0, 0, 0.8);
     backdrop-filter: blur(12px);
     border-bottom-color: var(--border);
   }
-  nav .wrap { display: flex; align-items: center; gap: 1.75rem; height: 64px; }
+  nav .wrap { display: flex; align-items: center; gap: 2rem; height: 72px; }
   .brand {
-    display: flex; align-items: center; gap: .6rem;
-    font-weight: 600; letter-spacing: -.02em; font-size: 1rem;
+    display: flex; align-items: center; gap: 0.75rem;
+    font-weight: 600; letter-spacing: -0.02em; font-size: 1.125rem; color: #fff; text-decoration: none;
   }
   .brand .mark {
-    width: 26px; height: 26px; border-radius: 7px;
-    background: #ffffff; color: #000000;
+    width: 32px; height: 32px; border-radius: 8px;
+    background: #fff; color: #000;
     display: inline-flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: .82rem; letter-spacing: -.04em;
+    font-weight: 800; font-size: 1rem;
   }
-  .brand span { color: var(--muted); font-weight: 500; }
-  nav a { color: var(--muted); text-decoration: none; font-size: .9rem; font-weight: 450; transition: color .15s; }
-  nav a:hover { color: var(--text); }
-  nav .spacer { margin-left: auto; }
+  .nav-links { display: flex; gap: 2rem; align-items: center; }
+  .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.95rem; font-weight: 500; transition: color 0.2s; }
+  .nav-links a:hover { color: #fff; }
+  .nav-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+  .nav-btn {
+    padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.875rem; font-weight: 500;
+    text-decoration: none; transition: var(--transition);
+    background: rgba(255,255,255,0.1); color: #fff; border: 1px solid var(--border);
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.15); border-color: var(--border-hi); }
 
-  header.hero { position: relative; text-align: center; padding: 7rem 0 4rem; z-index: 1; }
-  header.hero .wrap { position: relative; z-index: 1; }
+  /* Hero */
+  .hero { padding: 10rem 0 6rem; position: relative; overflow: hidden; }
+  .hero-glow {
+    position: absolute; top: -20%; left: 50%; transform: translateX(-50%);
+    width: 80vw; height: 80vh; pointer-events: none; z-index: -1;
+    background: radial-gradient(circle at center, rgba(74, 222, 128, 0.15), rgba(96, 165, 250, 0.05) 30%, transparent 70%);
+    filter: blur(80px); animation: pulse 8s ease-in-out infinite alternate;
+  }
+  @keyframes pulse { 0% { opacity: 0.6; transform: translateX(-50%) scale(0.95); } 100% { opacity: 1; transform: translateX(-50%) scale(1.05); } }
+  .hero-content { text-align: center; max-width: 800px; margin: 0 auto; }
   .pill {
-    display: inline-flex; align-items: center; gap: .5rem;
-    font-size: .8rem; color: var(--muted); margin-bottom: 1.75rem;
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    font-size: 0.875rem; color: var(--muted); margin-bottom: 2rem;
     border: 1px solid var(--border); border-radius: 999px;
-    padding: .35rem .85rem; background: rgba(9,9,11,.6);
+    padding: 0.5rem 1rem; background: rgba(255,255,255,0.03); backdrop-filter: blur(4px);
   }
-  .ping { width: 6px; height: 6px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 rgba(74,222,128,.7); animation: ping 2s ease-out infinite; }
-  @keyframes ping { 70% { box-shadow: 0 0 0 7px rgba(74,222,128,0); } 100% { box-shadow: 0 0 0 0 rgba(74,222,128,0); } }
-
-  h1 {
-    font-size: clamp(2.6rem, 7vw, 4.4rem); line-height: 1.05; margin: 0 0 1.25rem;
-    letter-spacing: -.045em; font-weight: 600;
-    background: linear-gradient(to right, #ffffff, #a1a1aa);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
-  h1 span { color: inherit; background: none; -webkit-text-fill-color: currentColor; }
-  .tagline { font-size: 1.1rem; color: var(--muted); max-width: 660px; margin: 0 auto 2rem; font-weight: 350; }
-  .badges { display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-bottom: 2.25rem; }
-  .badge {
-    font-family: var(--mono); font-size: .75rem; padding: .32rem .75rem;
-    border: 1px solid var(--border); border-radius: 999px; color: var(--muted);
-    background: rgba(9,9,11,.5); transition: border-color .15s, color .15s;
-  }
-  .badge:hover { border-color: var(--border-hi); color: var(--text); }
-  .badge b { color: var(--good); font-weight: 500; }
-
-  .cta { display: flex; gap: .7rem; justify-content: center; flex-wrap: wrap; }
+  .ping { width: 8px; height: 8px; border-radius: 50%; background: var(--good); box-shadow: 0 0 0 0 rgba(74,222,128,0.7); animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+  @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+  .hero-tagline { font-size: 1.25rem; font-weight: 300; max-width: 680px; margin: 0 auto 2.5rem; line-height: 1.6; }
+  .cta-group { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 4rem; }
   .btn {
-    display: inline-flex; align-items: center; gap: .5rem;
-    padding: .7rem 1.35rem; border-radius: 10px; font-weight: 500; font-size: .92rem;
-    text-decoration: none; border: 1px solid transparent; cursor: pointer;
-    transition: transform .15s ease, background .15s ease, border-color .15s ease, opacity .15s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.875rem 1.75rem; border-radius: 10px; font-weight: 600; font-size: 1rem;
+    text-decoration: none; transition: var(--transition); cursor: pointer; border: 1px solid transparent;
   }
-  .btn:hover { transform: translateY(-1px); }
-  .btn-primary { background: #ffffff; color: #000000; }
-  .btn-primary:hover { opacity: .88; }
-  .btn-ghost { border-color: var(--border); color: var(--text); background: rgba(9,9,11,.5); }
-  .btn-ghost:hover { border-color: var(--border-hi); background: rgba(24,24,27,.7); }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { background: #fff; color: #000; box-shadow: 0 4px 14px 0 rgba(255,255,255,0.25); }
+  .btn-primary:hover { background: #f4f4f5; box-shadow: 0 6px 20px rgba(255,255,255,0.23); }
+  .btn-secondary { background: rgba(255,255,255,0.05); color: #fff; border-color: var(--border); backdrop-filter: blur(4px); }
+  .btn-secondary:hover { background: rgba(255,255,255,0.1); border-color: var(--border-hi); }
 
-  section { padding: 4rem 0; position: relative; }
-  h2 { font-size: 1.75rem; letter-spacing: -.03em; margin: 0 0 .5rem; font-weight: 600; }
-  .lede { color: var(--muted); margin: 0 0 1.75rem; max-width: 700px; font-weight: 350; }
+  /* Terminal Mockup */
+  .terminal-mockup {
+    background: #09090b; border: 1px solid var(--border); border-radius: 12px;
+    overflow: hidden; max-width: 900px; margin: 0 auto; text-align: left;
+    box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7);
+    transform: perspective(1000px) rotateX(2deg);
+    transition: transform 0.5s ease;
+  }
+  .terminal-mockup:hover { transform: perspective(1000px) rotateX(0deg); border-color: var(--border-hi); }
+  .terminal-header {
+    display: flex; align-items: center; padding: 0.875rem 1rem;
+    background: #18181b; border-bottom: 1px solid var(--border);
+  }
+  .terminal-dots { display: flex; gap: 6px; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f56; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #27c93f; }
+  .terminal-title { margin: 0 auto; color: var(--muted-dim); font-family: var(--mono); font-size: 0.85rem; }
+  .terminal-body { padding: 1.5rem; font-family: var(--mono); font-size: 0.9rem; line-height: 1.6; color: var(--muted); }
+  .term-cmd { color: #fff; font-weight: 500; }
+  .term-cmd::before { content: "$ "; color: var(--blue); }
+  .term-output { margin-top: 1rem; }
+  .term-success { color: var(--good); }
+  .term-score { font-size: 1.1rem; color: #fff; font-weight: 600; margin-top: 1rem; border-top: 1px dashed var(--border); padding-top: 1rem; display: flex; justify-content: space-between; }
 
-  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.75rem; }
+  /* Logos Marquee */
+  .logos-section { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.4); padding: 2.5rem 0; overflow: hidden; }
+  .logos-title { text-align: center; color: var(--muted-dim); font-size: 0.875rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 2rem; }
+  .logos-track { display: flex; gap: 4rem; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .logo-item { display: flex; align-items: center; gap: 0.5rem; color: var(--muted); font-weight: 600; font-size: 1.1rem; opacity: 0.7; transition: var(--transition); }
+  .logo-item:hover { opacity: 1; color: #fff; }
 
-  /* Terminal-style chrome frame */
+  /* Features Grid */
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+  
+  .feature-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 2rem; transition: var(--transition); position: relative; overflow: hidden;
+  }
+  .feature-card:hover { background: var(--bg-card-hover); border-color: var(--border-hi); transform: translateY(-3px); }
+  .feature-icon {
+    width: 48px; height: 48px; border-radius: 12px; background: rgba(255,255,255,0.05);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 1.5rem; color: #fff;
+    border: 1px solid var(--border);
+  }
+  .feature-card h3 { font-size: 1.25rem; margin-bottom: 0.75rem; color: #fff; }
+  .feature-card p { margin: 0; font-size: 1rem; color: var(--muted); line-height: 1.6; }
+
+  /* Pipeline Visualization */
+  .pipeline { display: flex; flex-direction: column; gap: 1rem; position: relative; margin-top: 3rem; }
+  @media (min-width: 768px) { .pipeline { flex-direction: row; align-items: flex-start; } }
+  .pipe-step { flex: 1; background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; text-align: center; position: relative; }
+  .pipe-step .icon-wrap { width: 56px; height: 56px; border-radius: 50%; background: #fff; color: #000; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.25rem; }
+  .pipe-step h4 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+  .pipe-step p { font-size: 0.9rem; margin: 0; }
+  .pipe-arrow { display: none; }
+  @media (min-width: 768px) {
+    .pipe-arrow { display: flex; align-items: center; justify-content: center; color: var(--border-hi); padding-top: 3rem; }
+  }
+
+  /* Standards Layering */
+  .layering-container { display: flex; flex-direction: column; gap: 0.5rem; max-width: 600px; margin: 0 auto; }
+  .layer {
+    padding: 1.25rem 1.5rem; border-radius: var(--radius); border: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    background: rgba(10,10,10,0.6); position: relative; z-index: 1; transition: var(--transition);
+  }
+  .layer:hover { border-color: var(--border-hi); transform: scale(1.02); z-index: 2; background: rgba(20,20,20,0.9); }
+  .layer-name { font-weight: 600; font-size: 1.1rem; display: flex; align-items: center; gap: 0.75rem; }
+  .layer-desc { color: var(--muted); font-size: 0.9rem; font-family: var(--mono); }
+  .layer-1 { border-left: 4px solid var(--blue); }
+  .layer-2 { border-left: 4px solid var(--good); width: 95%; margin-left: auto; }
+  .layer-3 { border-left: 4px solid var(--purple); width: 90%; margin-left: auto; }
+  .layer-4 { border-left: 4px solid #f59e0b; width: 85%; margin-left: auto; }
+  .layer-5 { border-left: 4px solid var(--bad); width: 80%; margin-left: auto; }
+
+  /* Dimensions Grid */
+  .dims-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; }
+  .dim-card {
+    background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+    padding: 1.25rem; display: flex; align-items: flex-start; gap: 1rem; transition: var(--transition);
+  }
+  .dim-card:hover { background: rgba(255,255,255,0.05); border-color: var(--border-hi); transform: translateY(-2px); }
+  .dim-icon { color: var(--blue); flex-shrink: 0; }
+  .dim-content h4 { margin: 0 0 0.25rem; font-size: 1rem; }
+  .dim-content p { margin: 0; font-size: 0.85rem; line-height: 1.5; }
+
+  /* Scanner & Install UI matching original logic but upgraded look */
   .chrome {
-    background: rgba(9,9,11,.55); border: 1px solid var(--border);
-    border-radius: var(--radius); overflow: hidden;
+    background: #09090b; border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
   }
   .chrome-bar {
-    display: flex; align-items: center; gap: .45rem;
-    padding: .7rem .9rem; border-bottom: 1px solid var(--border);
-    background: rgba(24,24,27,.5);
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+    background: #18181b;
   }
-  .chrome-bar i { width: 10px; height: 10px; border-radius: 50%; background: #27272a; display: block; }
+  .chrome-bar i { width: 12px; height: 12px; border-radius: 50%; background: #3f3f46; display: block; }
   .chrome-title {
-    margin-left: .5rem; font-family: var(--mono); font-size: .76rem; color: var(--muted-dim);
+    margin: 0 auto; font-family: var(--mono); font-size: 0.85rem; color: var(--muted-dim);
   }
-  .chrome-body { padding: 1.75rem; }
+  .chrome-body { padding: 2.5rem; }
 
-  /* Scanner */
   .dropzone {
-    border: 1px dashed rgba(255,255,255,.22); border-radius: var(--radius);
-    padding: 3.25rem 1.5rem; text-align: center; cursor: pointer;
-    transition: border-color .2s, background .2s; background: rgba(24,24,27,.35);
+    border: 2px dashed var(--border-hi); border-radius: var(--radius);
+    padding: 4rem 2rem; text-align: center; cursor: pointer;
+    transition: var(--transition); background: rgba(255,255,255,0.02);
   }
-  .dropzone:hover, .dropzone.over { border-color: rgba(255,255,255,.45); background: rgba(39,39,42,.5); }
-  .dropzone.disabled { opacity: .5; cursor: not-allowed; }
-  .drop-icon { font-size: 2.4rem; display: block; margin-bottom: .6rem; filter: grayscale(1); }
-  .drop-title { font-size: 1.05rem; font-weight: 550; margin: 0 0 .3rem; }
-  .drop-desc { color: var(--muted); font-size: .875rem; margin: 0; }
+  .dropzone:hover, .dropzone.over { border-color: var(--blue); background: rgba(96, 165, 250, 0.05); }
+  .dropzone.disabled { opacity: 0.5; cursor: not-allowed; }
+  .drop-icon { display: flex; justify-content: center; margin-bottom: 1rem; color: var(--muted); }
+  .drop-title { font-size: 1.25rem; font-weight: 600; margin: 0 0 0.5rem; color: #fff; }
+  .drop-desc { color: var(--muted); font-size: 0.9rem; margin: 0; }
   #file-input { display: none; }
 
-  .status { margin-top: 1rem; text-align: center; color: var(--muted); font-size: .88rem; min-height: 1.5rem; font-family: var(--mono); }
+  .status { margin-top: 1.5rem; text-align: center; color: var(--muted); font-size: 0.95rem; min-height: 1.5rem; font-family: var(--mono); }
   .status.error { color: var(--bad); }
   .spinner {
-    display: inline-block; width: 12px; height: 12px; margin-right: .5rem;
-    border: 2px solid rgba(255,255,255,.2); border-top-color: #ffffff;
-    border-radius: 50%; animation: spin .7s linear infinite; vertical-align: -2px;
+    display: inline-block; width: 14px; height: 14px; margin-right: 0.5rem;
+    border: 2px solid rgba(255,255,255,0.2); border-top-color: #ffffff;
+    border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  #result { display: none; margin-top: 1.5rem; }
-  .result-bar { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
-  .score-chip { font-family: var(--mono); font-size: 1.05rem; font-weight: 600; padding: .4rem .9rem; border-radius: 10px; border: 1px solid var(--border); }
-  iframe#report { width: 100%; height: 640px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
+  #result { display: none; margin-top: 2rem; }
+  .result-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+  .score-chip { font-family: var(--mono); font-size: 1.25rem; font-weight: 700; padding: 0.5rem 1.25rem; border-radius: 8px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); }
+  .result-actions { display: flex; gap: 1rem; }
+  iframe#report { width: 100%; height: 700px; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; }
 
-  .privacy { margin-top: 1rem; font-size: .82rem; color: var(--muted-dim); text-align: center; }
+  .privacy { margin-top: 1.5rem; font-size: 0.85rem; color: var(--muted-dim); text-align: center; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
 
   /* Install tabs */
-  .tabs { display: flex; gap: .35rem; margin-bottom: -1px; flex-wrap: wrap; }
+  .tabs { display: flex; gap: 0.5rem; margin-bottom: -1px; flex-wrap: wrap; position: relative; z-index: 2; }
   .tab {
-    padding: .5rem 1rem; font-size: .875rem; font-weight: 450; cursor: pointer;
-    border: 1px solid var(--border); border-bottom: none;
-    border-radius: 9px 9px 0 0; color: var(--muted); background: rgba(9,9,11,.4);
-    transition: color .15s, background .15s;
+    padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 500; cursor: pointer;
+    border: 1px solid transparent; border-bottom: none;
+    border-radius: 10px 10px 0 0; color: var(--muted); background: transparent;
+    transition: var(--transition);
   }
-  .tab:hover { color: var(--text); }
-  .tab.active { color: var(--text); background: rgba(24,24,27,.85); }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.02); }
+  .tab.active { color: var(--text); background: #18181b; border-color: var(--border); border-bottom-color: #18181b; }
   pre {
-    margin: 0; background: rgba(9,9,11,.85); border: 1px solid var(--border);
-    border-radius: 0 var(--radius) var(--radius) var(--radius); padding: 1.15rem; overflow-x: auto;
-    font-family: var(--mono); font-size: .855rem; line-height: 1.75;
+    margin: 0; background: #18181b; border: 1px solid var(--border);
+    border-radius: 0 12px 12px 12px; padding: 1.5rem; overflow-x: auto;
+    font-family: var(--mono); font-size: 0.9rem; line-height: 1.7; position: relative; z-index: 1;
   }
   pre .c { color: var(--muted-dim); }
   pre .p { color: var(--good); }
   .pane { display: none; }
   .pane.active { display: block; }
 
-  /* Grids */
-  .grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
-  .card {
-    background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 1.35rem; transition: border-color .2s, background .2s, transform .2s;
+  /* Footer */
+  footer { border-top: 1px solid var(--border); padding: 4rem 0; background: #050505; }
+  .footer-grid { display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; }
+  @media (max-width: 640px) { .footer-grid { grid-template-columns: 1fr; text-align: center; } }
+  .footer-brand { display: flex; flex-direction: column; gap: 0.5rem; }
+  .footer-brand p { margin: 0; font-size: 0.875rem; color: var(--muted-dim); }
+  .footer-links { display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center; }
+  footer a { color: var(--muted); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+  footer a:hover { color: #fff; }
+  
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .hero { padding: 8rem 0 4rem; }
+    .terminal-mockup { margin: 0 1rem; }
+    .chrome-body { padding: 1.5rem; }
   }
-  .card:hover { border-color: var(--border-hi); background: rgba(24,24,27,.55); transform: translateY(-2px); }
-  .card h3 { margin: 0 0 .4rem; font-size: .97rem; font-weight: 550; }
-  .card p { margin: 0; color: var(--muted); font-size: .875rem; font-weight: 350; }
-  .dims { display: flex; flex-wrap: wrap; gap: .5rem; }
-  .dim {
-    font-size: .83rem; padding: .35rem .8rem; border-radius: 8px;
-    background: rgba(24,24,27,.6); border: 1px solid var(--border); color: var(--muted);
-    transition: border-color .15s, color .15s;
-  }
-  .dim:hover { border-color: var(--border-hi); color: var(--text); }
-
-  footer { border-top: 1px solid var(--border); padding: 2.5rem 0; color: var(--muted-dim); font-size: .85rem; }
-  footer a { color: var(--muted); text-decoration: none; }
-  footer a:hover { color: var(--text); }
-  .foot-row { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
-
   @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  }
-  @media (max-width: 640px) {
-    nav .hide-sm { display: none; }
-    header.hero { padding: 4rem 0 2.5rem; }
-    .glow { width: 420px; }
-    .chrome-body { padding: 1.15rem; }
+    * { animation: none !important; transition: none !important; }
+    .animate-on-scroll { opacity: 1; transform: none; }
   }
 </style>
 </head>
 <body>
 
-<nav>
+<nav id="navbar">
   <div class="wrap">
-    <div class="brand"><span class="mark">D</span>deval<span></span></div>
-    <a href="#scanner" class="hide-sm">Scanner</a>
-    <a href="#install" class="hide-sm">Install</a>
-    <a href="#dimensions" class="hide-sm">Dimensions</a>
-    <span class="spacer"></span>
-    <a href="https://github.com/DARREN-2000/deval">GitHub</a>
+    <a href="#" class="brand"><span class="mark">D</span>deval</a>
+    <div class="nav-links">
+      <a href="#why">Why Deval</a>
+      <a href="#how-it-works">How it Works</a>
+      <a href="#dimensions">Dimensions</a>
+      <a href="#install">Install</a>
+    </div>
+    <div class="nav-right">
+      <a href="https://github.com/DARREN-2000/deval" class="nav-btn" target="_blank" rel="noopener">GitHub</a>
+    </div>
   </div>
 </nav>
 
 <header class="hero" id="top">
-  <div class="glow" aria-hidden="true"></div>
+  <div class="hero-glow"></div>
   <div class="wrap">
-    <span class="pill"><span class="ping" aria-hidden="true"></span>v0.7.0 — 102 rules, 44 checks</span>
-    <h1>One score for<br><span>engineering health</span></h1>
-    <p class="tagline">
-      Deval evaluates any repository against 13 engineering dimensions and returns a single
-      deterministic score — same input, same result, every time. No model, no network, no guesswork.
-    </p>
-    <div class="badges">
-      <span class="badge">self-scan <b>100/100 A+</b></span>
-      <span class="badge">zero runtime dependencies</span>
-      <span class="badge">Python 3.9 – 3.13</span>
-      <span class="badge">SARIF · JSON · HTML · JUnit</span>
-      <span class="badge">MIT</span>
+    <div class="hero-content animate-on-scroll">
+      <div class="pill"><span class="ping" aria-hidden="true"></span> v0.7.0 — 102 rules, 44 checks</div>
+      <h1>One score for<br><span class="text-gradient">engineering health</span></h1>
+      <p class="hero-tagline">
+        Deval evaluates any repository against 13 engineering dimensions and returns a single
+        deterministic score. No models, no network calls, no guesswork. Just facts.
+      </p>
+      <div class="cta-group">
+        <a href="#scanner" class="btn btn-primary"><i data-lucide="play" style="width: 18px; height: 18px;"></i> Scan in browser</a>
+        <a href="#install" class="btn btn-secondary"><i data-lucide="terminal" style="width: 18px; height: 18px;"></i> Install CLI</a>
+      </div>
     </div>
-    <div class="cta">
-      <a href="#scanner" class="btn btn-primary">Scan a repo in your browser</a>
-      <a href="https://github.com/DARREN-2000/deval" class="btn btn-ghost">View source</a>
+
+    <div class="terminal-mockup animate-on-scroll">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+        </div>
+        <div class="terminal-title">bash — deval scan .</div>
+      </div>
+      <div class="terminal-body">
+        <div class="term-cmd">deval scan .</div>
+        <div class="term-output">
+          <div style="color: var(--muted-dim);">Detected: Python, FastAPI, Docker, GitHub Actions</div>
+          <div style="color: var(--muted-dim); margin-bottom: 1rem;">Applying: deval/python, deval/fastapi, deval/docker</div>
+          <div><span class="term-success">✓</span> Architecture: Controller → Service layering intact</div>
+          <div><span class="term-success">✓</span> Security: No hardcoded secrets, dependencies pinned</div>
+          <div><span style="color: var(--bad);">✗</span> Testing: Missing test coverage for core/auth.py</div>
+          <div class="term-score">
+            <span>Engineering Health</span>
+            <span style="color: var(--good);">93/100 · A</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </header>
 
+<section class="logos-section">
+  <div class="wrap">
+    <div class="logos-title">Unifies findings from best-in-class tools</div>
+    <div class="logos-track">
+      <div class="logo-item"><i data-lucide="code"></i> Ruff</div>
+      <div class="logo-item"><i data-lucide="shield-check"></i> Semgrep</div>
+      <div class="logo-item"><i data-lucide="lock"></i> Trivy</div>
+      <div class="logo-item"><i data-lucide="key"></i> Gitleaks</div>
+      <div class="logo-item"><i data-lucide="github"></i> Actionlint</div>
+      <div class="logo-item"><i data-lucide="check-circle"></i> Checkov</div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="section-header animate-on-scroll">
+      <h2>Why Deval?</h2>
+      <p>Engineering quality is fragmented across dozens of tools. Deval unifies them into a single, understandable metric.</p>
+    </div>
+    
+    <div class="grid-3 animate-on-scroll">
+      <div class="feature-card">
+        <div class="feature-icon"><i data-lucide="cpu"></i></div>
+        <h3>Deterministic, not probabilistic</h3>
+        <p>No model sits in the loop. The same commit always produces the same score. Rely on it to gate builds without flaking.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i data-lucide="combine"></i></div>
+        <h3>One score from many tools</h3>
+        <p>Findings from Ruff, Semgrep, Trivy, and Gitleaks are normalised, de-duplicated, and folded into a single number.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i data-lucide="book-open"></i></div>
+        <h3>Every rule explains itself</h3>
+        <p>Each rule carries a stable DV code with problem, rationale, example, and fix. <code>deval explain</code> prints all of it.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i data-lucide="layers"></i></div>
+        <h3>Standards you can layer</h3>
+        <p>Global → Recommended → Domain → Organization → Repo. Nothing is applied silently.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i data-lucide="puzzle"></i></div>
+        <h3>Rules are just functions</h3>
+        <p>Write a rule with a simple Python decorator. No complex subclassing, no massive framework to learn.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i data-lucide="rocket"></i></div>
+        <h3>Adoptable on day one</h3>
+        <p>Baselines freeze existing debt so a large codebase can enforce standards on new work without a massive rewrite.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="how-it-works" style="background: rgba(255,255,255,0.02); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="wrap">
+    <div class="section-header animate-on-scroll">
+      <h2>How it Works</h2>
+      <p>A fast, transparent pipeline from code to score.</p>
+    </div>
+
+    <div class="pipeline animate-on-scroll">
+      <div class="pipe-step">
+        <div class="icon-wrap"><i data-lucide="scan"></i></div>
+        <h4>1. Auto-Detect</h4>
+        <p>Deval scans your repo and instantly identifies the language, framework, and infrastructure.</p>
+      </div>
+      <div class="pipe-arrow"><i data-lucide="arrow-right"></i></div>
+      <div class="pipe-step">
+        <div class="icon-wrap"><i data-lucide="check-square"></i></div>
+        <h4>2. Evaluate</h4>
+        <p>Runs native checks and integrates external tools based on your specific stack.</p>
+      </div>
+      <div class="pipe-arrow"><i data-lucide="arrow-right"></i></div>
+      <div class="pipe-step">
+        <div class="icon-wrap"><i data-lucide="bar-chart-2"></i></div>
+        <h4>3. Score</h4>
+        <p>Deduplicates findings and calculates a deterministic score across 13 engineering dimensions.</p>
+      </div>
+      <div class="pipe-arrow"><i data-lucide="arrow-right"></i></div>
+      <div class="pipe-step">
+        <div class="icon-wrap"><i data-lucide="file-text"></i></div>
+        <h4>4. Report</h4>
+        <p>Outputs to Terminal, SARIF for GitHub Advanced Security, HTML, or JSON.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="standards">
+  <div class="wrap">
+    <div class="section-header animate-on-scroll">
+      <h2>Standards Architecture</h2>
+      <p>Standards compose in a five-level hierarchy. Later levels always win.</p>
+    </div>
+    
+    <div class="layering-container animate-on-scroll">
+      <div class="layer layer-1">
+        <div class="layer-name"><i data-lucide="globe"></i> Global Standard</div>
+        <div class="layer-desc">Universal guardrails</div>
+      </div>
+      <div class="layer layer-2">
+        <div class="layer-name"><i data-lucide="thumbs-up"></i> Deval Recommended</div>
+        <div class="layer-desc">Best practices</div>
+      </div>
+      <div class="layer layer-3">
+        <div class="layer-name"><i data-lucide="blocks"></i> Domain Standard</div>
+        <div class="layer-desc">React, FastAPI, K8s...</div>
+      </div>
+      <div class="layer layer-4">
+        <div class="layer-name"><i data-lucide="building"></i> Organization Standard</div>
+        <div class="layer-desc">Company policies</div>
+      </div>
+      <div class="layer layer-5">
+        <div class="layer-name"><i data-lucide="folder-git-2"></i> Repository Overrides</div>
+        <div class="layer-desc">.deval.yml</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dimensions" style="background: rgba(255,255,255,0.02); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);">
+  <div class="wrap">
+    <div class="section-header animate-on-scroll">
+      <h2>13 Engineering Dimensions</h2>
+      <p>Not just a flat checklist. Every finding belongs to a dimension with its own grade.</p>
+    </div>
+
+    <div class="dims-grid animate-on-scroll">
+      <div class="dim-card"><i data-lucide="layout-template" class="dim-icon"></i><div class="dim-content"><h4>Architecture</h4><p>Layering & dependencies</p></div></div>
+      <div class="dim-card"><i data-lucide="book" class="dim-icon"></i><div class="dim-content"><h4>Documentation</h4><p>READMEs & API docs</p></div></div>
+      <div class="dim-card"><i data-lucide="test-tube-2" class="dim-icon"></i><div class="dim-content"><h4>Testing</h4><p>Coverage & presence</p></div></div>
+      <div class="dim-card"><i data-lucide="shield" class="dim-icon"></i><div class="dim-content"><h4>Security</h4><p>Secrets & permissions</p></div></div>
+      <div class="dim-card"><i data-lucide="package" class="dim-icon"></i><div class="dim-content"><h4>Dependencies</h4><p>Lockfiles & pinning</p></div></div>
+      <div class="dim-card"><i data-lucide="git-merge" class="dim-icon"></i><div class="dim-content"><h4>CI/CD</h4><p>Pipelines & checks</p></div></div>
+      <div class="dim-card"><i data-lucide="users" class="dim-icon"></i><div class="dim-content"><h4>Ownership</h4><p>CODEOWNERS presence</p></div></div>
+      <div class="dim-card"><i data-lucide="wrench" class="dim-icon"></i><div class="dim-content"><h4>Maintainability</h4><p>File size & tech debt</p></div></div>
+      <div class="dim-card"><i data-lucide="activity" class="dim-icon"></i><div class="dim-content"><h4>Observability</h4><p>Logs & tracking</p></div></div>
+      <div class="dim-card"><i data-lucide="server" class="dim-icon"></i><div class="dim-content"><h4>Operations</h4><p>Deploy descriptors</p></div></div>
+      <div class="dim-card"><i data-lucide="file-check" class="dim-icon"></i><div class="dim-content"><h4>Compliance</h4><p>Licenses & auditing</p></div></div>
+      <div class="dim-card"><i data-lucide="folder" class="dim-icon"></i><div class="dim-content"><h4>Repository</h4><p>Baseline artifacts</p></div></div>
+      <div class="dim-card"><i data-lucide="layout-grid" class="dim-icon"></i><div class="dim-content"><h4>Structure</h4><p>Conventional layout</p></div></div>
+    </div>
+  </div>
+</section>
+
 <section id="scanner">
   <div class="wrap">
-    <h2>Try it — no install</h2>
-    <p class="lede">
-      Drop in a repository ZIP. This runs the <em>real</em> Deval engine compiled to WebAssembly,
-      not a simulation — the same code you get from PyPI. Your files never leave your machine.
-    </p>
+    <div class="section-header animate-on-scroll">
+      <h2>Try it — No Install Required</h2>
+      <p>Drop in a repository ZIP. The real Deval engine runs in WebAssembly. Your files never leave your machine.</p>
+    </div>
 
-    <div class="chrome">
+    <div class="chrome animate-on-scroll">
       <div class="chrome-bar" aria-hidden="true">
         <i></i><i></i><i></i>
         <span class="chrome-title">deval scan — running locally in your browser</span>
       </div>
       <div class="chrome-body">
-      <div class="dropzone disabled" id="dropzone">
-        <span class="drop-icon">📦</span>
-        <p class="drop-title">Drop a repository ZIP here</p>
-        <p class="drop-desc">or click to browse — max ~50 MB</p>
-        <input type="file" id="file-input" accept=".zip,application/zip">
-      </div>
-      <div class="status" id="status"><span class="spinner"></span>Starting Python runtime…</div>
-
-      <div id="result">
-        <div class="result-bar">
-          <span class="score-chip" id="score-chip"></span>
-          <button class="btn btn-ghost" id="download-btn" type="button">Download HTML report</button>
-          <button class="btn btn-ghost" id="again-btn" type="button">Scan another</button>
+        <div class="dropzone disabled" id="dropzone">
+          <div class="drop-icon"><i data-lucide="file-archive" style="width: 48px; height: 48px;"></i></div>
+          <p class="drop-title">Drop a repository ZIP here</p>
+          <p class="drop-desc">or click to browse — max ~50 MB</p>
+          <input type="file" id="file-input" accept=".zip,application/zip">
         </div>
-        <iframe id="report" sandbox="allow-same-origin" title="Deval report"></iframe>
-      </div>
+        <div class="status" id="status"><span class="spinner"></span>Starting Python runtime…</div>
 
-      <p class="privacy">
-        Runs entirely client-side via Pyodide. Nothing is uploaded, logged, or transmitted.
-        Plugin rules inside the ZIP are <strong>not</strong> executed.
-      </p>
+        <div id="result">
+          <div class="result-bar">
+            <span class="score-chip" id="score-chip"></span>
+            <div class="result-actions">
+              <button class="btn btn-secondary" id="download-btn" type="button"><i data-lucide="download" style="width:16px;height:16px;"></i> Download HTML</button>
+              <button class="btn btn-primary" id="again-btn" type="button"><i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i> Scan Another</button>
+            </div>
+          </div>
+          <iframe id="report" sandbox="allow-same-origin" title="Deval report"></iframe>
+        </div>
+
+        <p class="privacy"><i data-lucide="shield-check" style="width: 16px; height: 16px; color: var(--good);"></i> Runs client-side via Pyodide. Nothing is uploaded or logged.</p>
       </div>
     </div>
   </div>
@@ -342,17 +598,20 @@
 
 <section id="install">
   <div class="wrap">
-    <h2>Install</h2>
-    <p class="lede">Deval has no required runtime dependencies, so it drops into any environment without pulling a tree of packages behind it.</p>
-
-    <div class="tabs">
-      <div class="tab active" data-pane="pip">pip</div>
-      <div class="tab" data-pane="docker">Docker</div>
-      <div class="tab" data-pane="action">GitHub Action</div>
-      <div class="tab" data-pane="ci">Quality gate</div>
+    <div class="section-header animate-on-scroll">
+      <h2>Install</h2>
+      <p>Zero dependencies. Drops into any environment instantly.</p>
     </div>
 
-    <div class="pane active" id="pane-pip">
+    <div class="animate-on-scroll" style="max-width: 800px; margin: 0 auto;">
+      <div class="tabs">
+        <div class="tab active" data-pane="pip">pip</div>
+        <div class="tab" data-pane="docker">Docker</div>
+        <div class="tab" data-pane="action">GitHub Action</div>
+        <div class="tab" data-pane="ci">Quality Gate</div>
+      </div>
+
+      <div class="pane active" id="pane-pip">
 <pre><span class="c"># Install from PyPI</span>
 <span class="p">pip install deval</span>
 
@@ -365,21 +624,20 @@
 
 <span class="c"># Understand any rule, with rationale and a fix</span>
 <span class="p">deval explain DV6003</span></pre>
-    </div>
+      </div>
 
-    <div class="pane" id="pane-docker">
+      <div class="pane" id="pane-docker">
 <pre><span class="c"># Scan the current directory, read-only, as a non-root user</span>
 <span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:latest</span>
 
 <span class="c"># Any subcommand works</span>
-<span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:latest \
-  scan . -f markdown</span>
+<span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:latest   scan . -f markdown</span>
 
 <span class="c"># Pin a version for reproducible pipelines</span>
 <span class="p">docker run --rm -v "$PWD:/repo:ro" ghcr.io/darren-2000/deval:0.6.0</span></pre>
-    </div>
+      </div>
 
-    <div class="pane" id="pane-action">
+      <div class="pane" id="pane-action">
 <pre><span class="c"># .github/workflows/deval.yml</span>
 name: deval
 on: [push, pull_request]
@@ -404,9 +662,9 @@ jobs:
 
       <span class="c"># Outputs: score, grade, passed</span>
       - run: echo "Scored ${{ steps.deval.outputs.score }}"</pre>
-    </div>
+      </div>
 
-    <div class="pane" id="pane-ci">
+      <div class="pane" id="pane-ci">
 <pre><span class="c"># Fail the build below a score, or on any error-level finding</span>
 <span class="p">deval scan . --min-score 80 --fail-on error</span>
 
@@ -416,76 +674,31 @@ jobs:
 
 <span class="c"># Check config and tool readiness before you rely on it</span>
 <span class="p">deval doctor .</span></pre>
-    </div>
-  </div>
-</section>
-
-<section id="why">
-  <div class="wrap">
-    <h2>What makes it different</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>Deterministic, not probabilistic</h3>
-        <p>No model sits in the loop. The same commit always produces the same score, so it can gate a build without flaking.</p>
-      </div>
-      <div class="card">
-        <h3>One score from many tools</h3>
-        <p>Findings from Ruff, Semgrep, Trivy, and Gitleaks are normalised, de-duplicated, and folded into a single number.</p>
-      </div>
-      <div class="card">
-        <h3>Every rule explains itself</h3>
-        <p>Each rule carries a stable DV code with problem, rationale, example, and fix. <code>deval explain</code> prints all of it.</p>
-      </div>
-      <div class="card">
-        <h3>Standards you can layer</h3>
-        <p>Global → Recommended → Domain → Organization → Repository. A repo override always wins; nothing is applied silently.</p>
-      </div>
-      <div class="card">
-        <h3>Rules are just functions</h3>
-        <p>Write a rule with a decorator and drop it in a plugin folder. No subclassing, no framework to learn.</p>
-      </div>
-      <div class="card">
-        <h3>Adoptable on day one</h3>
-        <p>Baselines freeze existing debt so a large codebase can enforce standards on new work without a rewrite.</p>
       </div>
     </div>
-  </div>
-</section>
-
-<section id="dimensions">
-  <div class="wrap">
-    <h2>13 engineering dimensions</h2>
-    <p class="lede">Each dimension is scored independently, then weighted into the overall figure. Dimensions with no evidence are excluded rather than counted as perfect.</p>
-    <div class="dims">
-      <span class="dim">Repository</span><span class="dim">Documentation</span><span class="dim">Architecture</span>
-      <span class="dim">Structure</span><span class="dim">Dependencies</span><span class="dim">Testing</span>
-      <span class="dim">CI/CD</span><span class="dim">Security</span><span class="dim">Maintainability</span>
-      <span class="dim">Ownership</span><span class="dim">Observability</span><span class="dim">Operations</span>
-      <span class="dim">Compliance</span>
-    </div>
-    <p class="lede" style="margin-top:1.5rem">
-      Full reference:
-      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/dimensions.md">dimensions</a> ·
-      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/standards.md">standards</a> ·
-      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/principles.md">principles</a> ·
-      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/ecosystem.md">ecosystem</a>
-    </p>
   </div>
 </section>
 
 <footer>
-  <div class="wrap foot-row">
-    <div>MIT licensed · <span id="bundle-meta">Deval</span></div>
-    <div>
-      <a href="https://github.com/DARREN-2000/deval">GitHub</a> ·
-      <a href="https://pypi.org/project/deval/">PyPI</a> ·
+  <div class="wrap footer-grid">
+    <div class="footer-brand">
+      <div class="brand"><span class="mark">D</span>deval</div>
+      <p>The Engineering Standards Platform. <span id="bundle-meta">Deval</span></p>
+      <p>© MIT Licensed</p>
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/DARREN-2000/deval">GitHub</a>
+      <a href="https://pypi.org/project/deval/">PyPI</a>
       <a href="https://github.com/DARREN-2000/deval/blob/main/CHANGELOG.md">Changelog</a>
+      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/dimensions.md">Dimensions</a>
+      <a href="https://github.com/DARREN-2000/deval/blob/main/docs/standards.md">Standards</a>
     </div>
   </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
 <script>
 (function () {
   "use strict";
@@ -740,6 +953,40 @@ jobs:
     setStatus("Could not start the runtime: " + err.message, false, true);
   });
 })();
+</script
+
+// Initialize Lucide icons
+lucide.createIcons();
+
+// Navbar scroll effect
+const nav = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 20) {
+    nav.classList.add('scrolled');
+  } else {
+    nav.classList.remove('scrolled');
+  }
+});
+
+// Intersection Observer for scroll animations
+const observerOptions = {
+  root: null,
+  rootMargin: '0px',
+  threshold: 0.1
+};
+
+const observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    }
+  });
+}, observerOptions);
+
+document.querySelectorAll('.animate-on-scroll').forEach(element => {
+  observer.observe(element);
+});
 </script>
 </body>
 </html>

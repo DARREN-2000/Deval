@@ -202,6 +202,8 @@ def build_index(root: str | os.PathLike, extra_ignores: Iterable[str] = ()) -> R
             if _matches_any(rel, ignores):
                 continue
             fpath = Path(dirpath) / fname
+            if fpath.is_symlink():
+                continue
             try:
                 size = fpath.stat().st_size
             except OSError:

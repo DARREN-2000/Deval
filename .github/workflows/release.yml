@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Python 3.11+ is required for the `tomllib` import used to read package version.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -46,6 +47,7 @@ jobs:
       attestations: write  # required to record it against the repository
     steps:
       - uses: actions/checkout@v4
+      # Python 3.11+ is required for the `tomllib` import used to read package version.
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -55,6 +57,8 @@ jobs:
           python -m build
       - name: Check package metadata
         run: twine check dist/*
+      # We use /tmp/smoke (outside the repository directory) so that Deval's 
+      # scan of '.' doesn't inspect the temporary virtual environment.
       - name: Verify the wheel installs and runs clean
         run: |
           python -m venv /tmp/smoke

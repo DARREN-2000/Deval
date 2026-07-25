@@ -38,6 +38,8 @@ def _load_yaml(text: str) -> dict[str, Any]:
         import yaml  # type: ignore
 
         data = yaml.safe_load(text)
+        if not isinstance(data, dict):
+            return {}
         return data or {}
     except Exception:
         return _mini_yaml(text)
