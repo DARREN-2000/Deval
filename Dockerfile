@@ -1,6 +1,6 @@
 # Multi-stage build: the wheel is built in a throwaway stage so that build
 # tooling (hatchling, setuptools) never reaches the published image.
-FROM python:3.13-slim AS build
+FROM python:3.14-slim AS build
 
 WORKDIR /build
 
@@ -13,7 +13,7 @@ COPY src ./src
 RUN python -m hatchling build -t wheel && ls -1 dist
 
 
-FROM python:3.13-slim AS runtime
+FROM python:3.14-slim AS runtime
 
 LABEL org.opencontainers.image.title="deval" \
       org.opencontainers.image.description="The open-source Engineering Standards Platform - one deterministic health score for any repository." \
